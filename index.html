@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON Editor</title>
+    <style>
+        body,
+        html {
+            height: 100%;
+            margin: 0;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 80vh;
+            /* Adjust based on your requirement */
+            border: 1px solid black;
+            margin-bottom: 10px;
+        }
+
+        .fields {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .field {
+            flex: 1;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .field label {
+            font-weight: bold;
+        }
+
+        .field p,
+        .field textarea {
+            width: 100%;
+            height: calc(100% - 20px);
+            box-sizing: border-box;
+            margin: 0;
+        }
+
+        .field p {
+            overflow-y: scroll;
+            white-space: pre-wrap;
+        }
+
+        .field textarea {
+            overflow-y: scroll;
+        }
+
+        .delete-btn {
+            color: red;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .save-btn,
+        .pagination button {
+            margin-top: 10px;
+            padding: 5px 10px;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .pagination input {
+            width: 50px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>JSON Editor</h2>
+    <input type="file" id="fileInput" />
+    <div id="data-container">
+        <!-- Data fields will be inserted here dynamically -->
+    </div>
+    <div class="pagination">
+        <button onclick="prevPage()">Previous</button>
+        <span id="pageNumber">1</span> / <span id="totalPages">1</span>
+        <button onclick="nextPage()">Next</button>
+        <input type="number" id="pageInput" min="1" />
+        <button onclick="goToPage()">Go</button>
+    </div>
+    <button class="save-btn" onclick="downloadJSON()">Save Changes</button>
+
+    <script>
+        let jsonData = [];
+        let currentPage = 1;
+        const itemsPerPage = 1;
+
+        document.getElementById('fileInput').addEventListener('change', function (event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    jsonData = JSON.parse(e.target.result);
+                    renderPage();
+                };
+                reader.readAsText(file);
+            }
+        });
+
+        function renderPage() {
+            const container = document.getElementById('data-container');
+            container.innerHTML = '';
+
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = Math.min(startIndex + itemsPerPage, jsonData.length);
+
+            for (let i = startIndex; i < endIndex; i++) {
+                const item = jsonData[i];
+                const itemContainer = document.createElement('div');
+                itemContainer.className = 'container';
+
+                const fieldsContainer = document.createElement('div');
+                fieldsContainer.className = 'fields';
+
+                const instructionField = document.createElement('div');
+                instructionField.className = 'field';
+                instructionField.innerHTML = `<label>Instruction:</label><p>${item.instruction}</p>`;
+                fieldsContainer.appendChild(instructionField);
+
+                const outputField = document.createElement('div');
+                outputField.className = 'field';
+                const outputTextarea = document.createElement('textarea');
+                outputTextarea.value = item.output;
+                outputTextarea.onchange = function () {
+                    jsonData[i].output = this.value;
+                };
+                outputField.innerHTML = '<label>Output:</label>';
+                outputField.appendChild(outputTextarea);
+                fieldsContainer.appendChild(outputField);
+
+                itemContainer.appendChild(fieldsContainer);
+
+                const actionsField = document.createElement('div');
+                actionsField.className = 'field';
+                actionsField.style.flex = 'none';
+                const deleteBtn = document.createElement('span');
+                deleteBtn.innerText = 'Delete';
+                deleteBtn.className = 'delete-btn';
+                deleteBtn.onclick = function () {
+                    deleteRow(i);
+                };
+                actionsField.appendChild(deleteBtn);
+                itemContainer.appendChild(actionsField);
+
+                container.appendChild(itemContainer);
+            }
+
+            document.getElementById('pageNumber').innerText = currentPage;
+            document.getElementById('totalPages').innerText = Math.ceil(jsonData.length / itemsPerPage);
+        }
+
+        function deleteRow(index) {
+            jsonData.splice(index, 1);
+            if (currentPage > Math.ceil(jsonData.length / itemsPerPage)) {
+                currentPage = Math.ceil(jsonData.length / itemsPerPage);
+            }
+            renderPage();
+        }
+
+        function downloadJSON() {
+            const blob = new Blob([JSON.stringify(jsonData, null, 4)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'data.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function prevPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                renderPage();
+            }
+        }
+
+        function nextPage() {
+            if (currentPage < Math.ceil(jsonData.length / itemsPerPage)) {
+                currentPage++;
+                renderPage();
+            }
+        }
+
+        function goToPage() {
+            const pageInput = document.getElementById('pageInput').value;
+            const totalPages = Math.ceil(jsonData.length / itemsPerPage);
+            if (pageInput >= 1 && pageInput <= totalPages) {
+                currentPage = parseInt(pageInput, 10);
+                renderPage();
+            } else {
+                alert(`Please enter a page number between 1 and ${totalPages}`);
+            }
+        }
+    </script>
+
+</body>
+
+</html>
