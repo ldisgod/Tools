@@ -1,21 +1,9 @@
 <View className="root">
   <Style>
-    html, body {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  overflow: hidden; /* 确保页面没有滚动条 */
-}
-
     .root {
       font-family: 'Roboto', sans-serif;
       line-height: 1.6;
       background-color: #f0f0f0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 86vh;
-      overflow: hidden;
     }
     .container {
       display: flex;
@@ -25,9 +13,7 @@
       background-color: #ffffff;
       border-radius: 5px;
       box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.1), 0 6px 20px 0 rgba(0, 0, 0, 0.1);
-      width: 100%;
-      height: 100%;
-    overflow: hidden;
+      align-items: stretch;
     }
     .instruction {
       flex-basis: 49%;
@@ -35,11 +21,12 @@
       background-color: #0084ff;
       color: #ffffff;
       border-radius: 5px;
+      margin-bottom: 20px;
       box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1), 0 3px 10px 0 rgba(0, 0, 0, 0.1);
-      overflow: auto;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+    font-size: 16px;
     }
     .output-input {
       flex-basis: 49%;
@@ -54,11 +41,11 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      height: 100%;
+      max-height: 100%;  /* 确保高度匹配 */
     }
     .output-input textarea {
       width: 100%;
-      height: 100%;
+      max-height: 100%;  /* 确保高度匹配 */
       background-color: transparent;
       border: none;
       color: #ffffff;
@@ -66,9 +53,8 @@
       font-size: 16px;
       outline: none;
       resize: none;
-      overflow: auto;
+      overflow: auto;  /* 显示滚动条 */
       white-space: pre-wrap;
-      flex-grow: 1;
     }
     .output-input textarea:focus {
       outline: none;
@@ -92,13 +78,13 @@
                 maxSubmissions="1" required="true"
                 requiredMessage="You must provide the response to the instruction"
                 placeholder="Type your answer here..."
-                rows="40" 
+                rows="200"
       />
     </View>
   </View>
 </View>
 
 <!-- {"data" : {
-  "instruction": "Some instruction text 一些说明文字",
+  "instruction": "Some instruction text",
   "output": "Some output text"
 }} -->
